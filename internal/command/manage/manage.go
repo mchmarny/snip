@@ -70,6 +70,7 @@ func parseSnippet(text string) (snippet *snip.Snippet, err error) {
 	if e != nil {
 		return nil, fmt.Errorf("error parsing objectives: %v", err)
 	}
+	s.Objectives = cleanTokens(objList, objectiveToken)
 
 	// text, replace all objectives
 	txt := s.Raw
@@ -77,7 +78,6 @@ func parseSnippet(text string) (snippet *snip.Snippet, err error) {
 		txt = strings.ReplaceAll(txt, o, "")
 	}
 	s.Text = strings.TrimSpace(txt)
-	s.Objectives = cleanTokens(objList, objectiveToken)
 
 	return s, nil
 }
@@ -92,18 +92,20 @@ func parseItems(s, exp string) (items []string, err error) {
 		parts = []string{}
 	}
 
+	list := make([]string, len(parts))
 	for i, p := range parts {
-		parts[i] = strings.ReplaceAll(p, " ", "")
+		list[i] = strings.ReplaceAll(p, " ", "")
 	}
 
-	return parts, nil
+	return list, nil
 }
 
 func cleanTokens(parts []string, token string) []string {
 
+	list := make([]string, len(parts))
 	for i, p := range parts {
-		parts[i] = strings.ReplaceAll(p, token, "")
+		list[i] = strings.ReplaceAll(p, token, "")
 	}
 
-	return parts
+	return list
 }
