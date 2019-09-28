@@ -1,6 +1,10 @@
 .PHONY: run mod build
 
 # DEV
+
+test:
+	go test ./... -v
+
 install:
 	go install
 

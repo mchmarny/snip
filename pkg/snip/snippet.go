@@ -1,6 +1,10 @@
 package snip
 
-import "time"
+import (
+	"fmt"
+	"strings"
+	"time"
+)
 
 // Snippet represents a single snippet
 type Snippet struct {
@@ -14,4 +18,11 @@ type Snippet struct {
 	Contexts []string
 	// Tags is the extracted #tags from raw
 	Tags []string
+}
+
+func (s Snippet) String() string {
+	return fmt.Sprintf("Raw:%s On:%s Tags:%s Ctx:%s",
+		s.Raw, s.CreationTime.String(),
+		strings.Join(s.Tags, ","),
+		strings.Join(s.Contexts, ","))
 }
