@@ -1,48 +1,63 @@
 package main
 
 import (
+	"fmt"
 	"log"
-	"net"
 	"os"
 
-	"github.com/gin-gonic/gin"
-	"github.com/thinkerou/favicon"
-
-	ev "github.com/mchmarny/gcputil/env"
-)
-
-const (
-	defaultPort      = "8080"
-	portVariableName = "PORT"
+	"github.com/urfave/cli"
 )
 
 var (
-	release = ev.MustGetEnvVar("RELEASE", "v0.0.1")
-	logger  = log.New(os.Stdout, "[APP] ", 0)
+	logger = log.New(os.Stdout, "[APP] ", 0)
 )
 
 func main() {
+	app := cli.NewApp()
+	app.Name = "snip"
+	app.Usage = "Snippet management utility"
 
-	gin.SetMode(gin.ReleaseMode)
-	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(favicon.New("./favicon.ico"))
-
-	// routes
-	r.GET("/", defaultRequestHandler)
-	r.GET("/health", healthHandler)
-
-	// api
-	v1 := r.Group("/v1")
-	{
-		v1.GET("/message/:msg", apiRequestHandler)
+	app.Commands = []cli.Command{
+		{
+			Name:     "config",
+			Category: "Config",
+			Usage:    "configuration options",
+			Subcommands: []cli.Command{
+				{
+					Name:  "init",
+					Usage: "reinitialize the snip configuration",
+					Action: func(c *cli.Context) error {
+						fmt.Println("todo - reinitialize configuration ", c.Args().First())
+						return nil
+					},
+				},
+			},
+		},
+		{
+			Name:     "add",
+			Category: "Manage",
+			Usage:    "add new snippet",
+			Action: func(c *cli.Context) error {
+				fmt.Println("todo - capture new snippet: ", c.Args().First())
+				return nil
+			},
+		},
+		{
+			Name:     "list",
+			Category: "Report",
+			Flags: []cli.Flag{
+				cli.StringFlag{Name: "period, p"},
+			},
+			Usage: "lists snippets for specified period",
+			Action: func(c *cli.Context) error {
+				fmt.Println("todo - list for period:", c.String("period"))
+				return nil
+			},
+		},
 	}
 
-	// server
-	port := ev.MustGetEnvVar(portVariableName, defaultPort)
-	hostPost := net.JoinHostPort("0.0.0.0", port)
-	logger.Printf("Server starting: %s \n", hostPost)
-	if err := r.Run(hostPost); err != nil {
-		logger.Fatal(err)
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
