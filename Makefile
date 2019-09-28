@@ -1,8 +1,8 @@
 .PHONY: run mod build
 
 # DEV
-run:
-	go run *.go -v
+install:
+	go install
 
 # BUILD
 mod:

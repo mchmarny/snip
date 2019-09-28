@@ -15,6 +15,7 @@ var (
 func main() {
 	app := cli.NewApp()
 	app.Name = "snip"
+	app.Version = "v0.1.1"
 	app.Usage = "Snippet management utility"
 
 	app.Commands = []cli.Command{
