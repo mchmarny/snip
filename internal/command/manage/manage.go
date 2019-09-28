@@ -58,26 +58,31 @@ func parseSnippet(text string) (snippet *snip.Snippet, err error) {
 		CreationTime: time.Now(),
 	}
 
-	// tags
-	list, e := parseItems(text, objectiveToken, objectiveRegExp)
-	if e != nil {
-		return nil, fmt.Errorf("error parsing objectives: %v", err)
-	}
-	log.Printf("found %d objectives", len(list))
-	s.Objectives = list
-
 	// context
-	list, e = parseItems(text, contextToken, contextRegExp)
+	ctxList, e := parseItems(text, contextRegExp)
 	if e != nil {
 		return nil, fmt.Errorf("error parsing context: %v", err)
 	}
-	log.Printf("found %d contexts", len(list))
-	s.Contexts = list
+	s.Contexts = cleanTokens(ctxList, contextToken)
+
+	// objectives
+	objList, e := parseItems(text, objectiveRegExp)
+	if e != nil {
+		return nil, fmt.Errorf("error parsing objectives: %v", err)
+	}
+
+	// text, replace all objectives
+	txt := s.Raw
+	for _, o := range objList {
+		txt = strings.ReplaceAll(txt, o, "")
+	}
+	s.Text = strings.TrimSpace(txt)
+	s.Objectives = cleanTokens(objList, objectiveToken)
 
 	return s, nil
 }
 
-func parseItems(s, t, exp string) (items []string, err error) {
+func parseItems(s, exp string) (items []string, err error) {
 	r, e := regexp.Compile(exp)
 	if e != nil {
 		return nil, e
@@ -88,9 +93,17 @@ func parseItems(s, t, exp string) (items []string, err error) {
 	}
 
 	for i, p := range parts {
-		// trim spaces and then the token
-		parts[i] = strings.Trim(strings.Trim(p, " "), t)
+		parts[i] = strings.ReplaceAll(p, " ", "")
 	}
 
 	return parts, nil
+}
+
+func cleanTokens(parts []string, token string) []string {
+
+	for i, p := range parts {
+		parts[i] = strings.ReplaceAll(p, token, "")
+	}
+
+	return parts
 }
