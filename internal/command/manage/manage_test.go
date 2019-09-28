@@ -6,22 +6,33 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseCleanTags(t *testing.T) {
-	items, err := parseItems("#test1 #test2", tagRegExp)
+func TestParseCleanObjectives(t *testing.T) {
+	items, err := parseItems("^obj1 ^obj2", objectiveToken, objectiveRegExp)
 	assert.Nil(t, err)
 	assert.NotNil(t, items)
 	assert.Equal(t, 2, len(items))
+	assert.Equal(t, "obj1", items[0])
 }
 
-func TestParseNonTags(t *testing.T) {
-	items, err := parseItems("test1#test2", tagRegExp)
+func TestParseNonObjectives(t *testing.T) {
+	items, err := parseItems("obj1^obj2", objectiveToken, objectiveRegExp)
 	assert.Nil(t, err)
-	assert.Nil(t, items)
+	assert.NotNil(t, items)
+	assert.Equal(t, 0, len(items))
 }
 
 func TestParseCleanContext(t *testing.T) {
-	items, err := parseItems("@test1 @test2", ctxRegExp)
+	items, err := parseItems("@person @place", contextToken, contextRegExp)
 	assert.Nil(t, err)
 	assert.NotNil(t, items)
 	assert.Equal(t, 2, len(items))
+	assert.Equal(t, "person", items[0])
+}
+
+func TestParseFullSnippet(t *testing.T) {
+	raw := "did this and that with @person1 in @place1 ^obj1"
+	item, err := parseSnippet(raw)
+	assert.Nil(t, err)
+	assert.NotNil(t, item)
+	assert.Equal(t, raw, item.Raw)
 }

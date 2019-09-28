@@ -16,13 +16,16 @@ type Snippet struct {
 	CreationTime time.Time
 	// Contexts is the extracted @context from raw
 	Contexts []string
-	// Tags is the extracted #tags from raw
-	Tags []string
+	// Objectives is the extracted #objective from raw
+	Objectives []string
 }
 
 func (s Snippet) String() string {
-	return fmt.Sprintf("Raw:%s On:%s Tags:%s Ctx:%s",
-		s.Raw, s.CreationTime.String(),
-		strings.Join(s.Tags, ","),
+	return fmt.Sprintf("%s (on:%s objectives[%d]:%s contexts[%d]:%s)",
+		s.Raw,
+		s.CreationTime.Format("2006-01-02 15:04"),
+		len(s.Objectives),
+		strings.Join(s.Objectives, ","),
+		len(s.Contexts),
 		strings.Join(s.Contexts, ","))
 }

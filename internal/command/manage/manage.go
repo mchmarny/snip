@@ -3,6 +3,7 @@ package manage
 import (
 	"errors"
 	"fmt"
+	"log"
 	"regexp"
 	"strings"
 	"time"
@@ -13,31 +14,36 @@ import (
 )
 
 const (
-	tagRegExp = `(?:^|\s)\#(\w+)\b`
-	ctxRegExp = `(?:^|\s)\@(\w+)\b`
+	objectiveToken  = "^"
+	objectiveRegExp = `(?:^|\s)\^(\w+)\b`
+	contextToken    = "@"
+	contextRegExp   = `(?:^|\s)\@(\w+)\b`
 )
 
 var (
 	// AddSnipCommand adds new snippet
 	AddSnipCommand = cli.Command{
-		Name:     "add",
-		Category: "Manage",
-		Usage:    "add new snippet",
-		Action:   addSnip,
+		SkipFlagParsing: true,
+		SkipArgReorder:  true,
+		Name:            "add",
+		Category:        "Manage",
+		Usage:           "add new snippet",
+		Action:          addSnip,
 	}
 )
 
 func addSnip(c *cli.Context) error {
 
-	// TODO: find cleaner way to parse the entire command
-	s, e := parseSnippet(fmt.Sprintf("%s %s",
-		c.Args().First(), strings.Join(c.Args().Tail(), " ")))
+	raw := strings.Join([]string(c.Args()), " ")
+	log.Printf("raw: %s", raw)
+
+	s, e := parseSnippet(raw)
 
 	if e != nil {
 		return e
 	}
 
-	fmt.Printf("snip: %s", s.String())
+	fmt.Printf("snip: %s\n", s.String())
 
 	return nil
 }
@@ -53,27 +59,38 @@ func parseSnippet(text string) (snippet *snip.Snippet, err error) {
 	}
 
 	// tags
-	list, e := parseItems(text, tagRegExp)
+	list, e := parseItems(text, objectiveToken, objectiveRegExp)
 	if e != nil {
-		return nil, fmt.Errorf("error parsing tags: %v", err)
+		return nil, fmt.Errorf("error parsing objectives: %v", err)
 	}
-	s.Tags = list
+	log.Printf("found %d objectives", len(list))
+	s.Objectives = list
 
 	// context
-	list, e = parseItems(text, ctxRegExp)
+	list, e = parseItems(text, contextToken, contextRegExp)
 	if e != nil {
 		return nil, fmt.Errorf("error parsing context: %v", err)
 	}
+	log.Printf("found %d contexts", len(list))
 	s.Contexts = list
 
 	return s, nil
 }
 
-func parseItems(s, exp string) (items []string, err error) {
+func parseItems(s, t, exp string) (items []string, err error) {
 	r, e := regexp.Compile(exp)
 	if e != nil {
 		return nil, e
 	}
-	list := r.FindAllString(s, -1)
-	return list, nil
+	parts := r.FindAllString(s, -1) // nil on no match
+	if parts == nil {               // parseItems always returns empty array s
+		parts = []string{}
+	}
+
+	for i, p := range parts {
+		// trim spaces and then the token
+		parts[i] = strings.Trim(strings.Trim(p, " "), t)
+	}
+
+	return parts, nil
 }
