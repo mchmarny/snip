@@ -3,6 +3,8 @@ package manage
 import (
 	"fmt"
 
+	"github.com/mchmarny/snip/pkg/snip"
+
 	"github.com/urfave/cli"
 )
 
@@ -17,6 +19,7 @@ var (
 )
 
 func addSnip(c *cli.Context) error {
-	fmt.Println("todo - capture new snippet: ", c.Args().First())
+	var list []*snip.Snippet
+	fmt.Println("todo - capture new snippet: ", c.Args().First(), len(list))
 	return nil
 }

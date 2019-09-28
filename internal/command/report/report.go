@@ -3,6 +3,8 @@ package report
 import (
 	"fmt"
 
+	"github.com/mchmarny/snip/pkg/snip"
+
 	"github.com/urfave/cli"
 )
 
@@ -32,11 +34,13 @@ var (
 )
 
 func reportPeriod(c *cli.Context) error {
-	fmt.Println("todo - list for period:", c.String("period"))
+	var list []*snip.Snippet
+	fmt.Println("todo - list for period:", c.String("period"), len(list))
 	return nil
 }
 
 func rankPeriod(c *cli.Context) error {
-	fmt.Println("todo - list for period:", c.String("period"))
+	var list []*snip.Snippet
+	fmt.Println("todo - list for period:", c.String("period"), len(list))
 	return nil
 }
