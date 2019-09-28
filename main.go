@@ -17,19 +17,19 @@ const (
 )
 
 func main() {
+
 	app := cli.NewApp()
 	app.Name = appName
 	app.Version = appVersion
 	app.Usage = "Snippet management utility"
-
 	app.Commands = []cli.Command{
 		config.InitConfigCommand,
 		manage.AddSnipCommand,
 		report.ReportCommand,
+		report.RankCommand,
 	}
 
-	err := app.Run(os.Args)
-	if err != nil {
+	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)
 	}
 }
