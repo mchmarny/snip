@@ -6,6 +6,7 @@ import (
 	"log"
 	"path"
 	"strings"
+	"time"
 
 	// sqlite provides DB driver implementation
 	_ "github.com/mattn/go-sqlite3"
@@ -97,6 +98,37 @@ func saveSnippet(item *snip.Snippet) error {
 	}
 
 	return nil
+}
+
+func getWeekSnippets(weekStart time.Time) (items []*snip.Snippet, err error) {
+
+	weekEnd := weekStart.AddDate(0, 0, 7)
+
+	db := getDB()
+	defer db.Close()
+
+	rows, err := db.Query(`SELECT
+		sid, stm, raw, txt, ctx, obj
+		FROM snippet
+		WHERE stm >= ? AND stm <= ?
+		ORDER BY stm
+	`, weekStart, weekEnd)
+
+	if err != nil {
+		return nil, fmt.Errorf("error selecting snippets: %v", err)
+	}
+
+	snips := []*snip.Snippet{}
+	for rows.Next() {
+		snip := &snip.Snippet{}
+		var ctxs, objs string
+		rows.Scan(&snip.ID, &snip.CreationTime, &snip.Raw, &snip.Text, &ctxs, &objs)
+		snip.Objectives = strings.Split(objs, ",")
+		snip.Contexts = strings.Split(ctxs, ",")
+		snips = append(snips, snip)
+	}
+
+	return snips, nil
 }
 
 func makeTable(db *sql.DB, sql string) error {

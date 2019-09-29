@@ -1,7 +1,11 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
 
 	"github.com/mchmarny/snip/pkg/snip"
 
@@ -34,13 +38,38 @@ var (
 )
 
 func reportPeriod(c *cli.Context) error {
-	var list []*snip.Snippet
-	fmt.Println("todo - list for period:", c.String("period"), len(list))
+
+	weekStart := getWeekPeriodStart(1)
+
+	list, err := getWeekSnippets(weekStart)
+	if err != nil {
+		return fmt.Errorf("error quering data: %v", err)
+	}
+
+	log.Printf("snippets for week startign with: %s ",
+		weekStart.Format(snip.SnippetDateTimeFormat))
+
+	for i, s := range list {
+		log.Printf("[%d] id:%s text:%s on:%s objectives:%s contexts:%s",
+			i,
+			s.ID,
+			s.Text,
+			s.CreationTime.Format(snip.SnippetDateTimeFormat),
+			strings.Join(s.Objectives, ","),
+			strings.Join(s.Contexts, ","))
+	}
+
 	return nil
 }
 
 func rankPeriod(c *cli.Context) error {
-	var list []*snip.Snippet
-	fmt.Println("todo - list for period:", c.String("period"), len(list))
-	return nil
+	return errors.New("not implemented yet")
+}
+
+func getWeekPeriodStart(offset int) time.Time {
+	now := time.Now()
+	today := now.Weekday()
+	lastSunday := now.AddDate(0, 0, -int(today))
+	periodStart := lastSunday.AddDate(0, 0, -(offset * 7))
+	return periodStart
 }
