@@ -58,11 +58,11 @@ func reportPeriod(c *cli.Context) error {
 		return fmt.Errorf("error quering data: %v", err)
 	}
 
-	fmt.Fprintf(wr, "#Week of: %s\n",
-		pr.PeriodStart.Format(snip.SnippetDateTimeFormat))
+	fmt.Fprintf(wr, "#Snippets Since: %s\n",
+		pr.PeriodStart.Format(snip.SnippetDateFormat))
 
 	for c, s := range pr.ObjectiveSnippets {
-		fmt.Fprintf(wr, "##%s\n", c)
+		fmt.Fprintf(wr, "\n##%s\n\n", c)
 		for _, si := range s {
 			fmt.Fprintf(wr, "* %s - %s\n",
 				si.CreationTime.Format(snip.SnippetDateFormat),
