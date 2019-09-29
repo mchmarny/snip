@@ -10,8 +10,12 @@ import (
 )
 
 const (
-	appName    = "snip"
-	appVersion = "v0.2.1"
+	appName = "snip"
+)
+
+var (
+	// AppVersion will be overritten during build
+	AppVersion = "v0.0.1-default"
 )
 
 func main() {
@@ -21,7 +25,7 @@ func main() {
 
 	app := cli.NewApp()
 	app.Name = appName
-	app.Version = appVersion
+	app.Version = AppVersion
 	app.Usage = "Snippet management utility"
 	app.Commands = []cli.Command{
 		cmd.InitConfigCommand,
