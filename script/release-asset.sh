@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # WIP: DON'T USE IT, still not working
-RELEASE_VERSION="v0.3.6"
+RELEASE_VERSION=$1
 
 FILE_PATH="bin/snip-windows-${RELEASE_VERSION}"
 FILE_NAME=$(basename $FILE_PATH)

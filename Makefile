@@ -36,10 +36,5 @@ tag:
 	git push origin "release-${RELEASE_VERSION}"
 
 assets:
-	script/release-asset.sh \
-		github_api_token="${GITHUB_ACCESS_TOKEN}" \
-		owner="mchmarny" \
-		repo="snip" \
-		tag="${RELEASE_VERSION}" \
-		filename="bin/snip-mac-${RELEASE_VERSION}"
+	script/release-asset.sh "${RELEASE_VERSION}"
 
