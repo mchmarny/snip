@@ -30,6 +30,15 @@ var (
 
 func initConfig(c *cli.Context) error {
 
+	initDir()
+
+	initDB() // fatal errors s
+
+	return nil
+}
+
+func initDir() error {
+
 	ok, err := userDirExists()
 	if err != nil {
 		return err
@@ -43,8 +52,6 @@ func initConfig(c *cli.Context) error {
 			return err
 		}
 	}
-
-	initDB() // fatal errors s
 
 	return nil
 }

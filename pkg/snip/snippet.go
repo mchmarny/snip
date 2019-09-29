@@ -23,20 +23,19 @@ type Snippet struct {
 	Text string
 	// CreationTime is the time when the snippet was created
 	CreationTime time.Time
+	// Objective is the extracted #objective from raw
+	Objective string
 	// Contexts is the extracted @context from raw
 	Contexts []string
-	// Objectives is the extracted #objective from raw
-	Objectives []string
 }
 
 func (s Snippet) String() string {
-	return fmt.Sprintf("%s (id:%s \ntext:%s \non:%s \nobjectives[%d]:%s \ncontexts[%d]:%s)",
+	return fmt.Sprintf("%s (id:%s \ntext:%s \non:%s \nobjective:%s \ncontexts[%d]:%s)",
 		s.ID,
 		s.Raw,
 		s.Text,
 		s.CreationTime.Format(SnippetDateTimeFormat),
-		len(s.Objectives),
-		strings.Join(s.Objectives, ","),
+		s.Objective,
 		len(s.Contexts),
 		strings.Join(s.Contexts, ","))
 }

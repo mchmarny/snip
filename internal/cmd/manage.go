@@ -74,14 +74,19 @@ func parseSnippet(text string) (snippet *snip.Snippet, err error) {
 	if e != nil {
 		return nil, fmt.Errorf("error parsing context: %v", err)
 	}
-	s.Contexts = cleanTokens(ctxList, contextToken)
+	s.Contexts = ctxList
 
 	// objectives
 	objList, e := parseItems(text, objectiveRegExp)
 	if e != nil {
 		return nil, fmt.Errorf("error parsing objectives: %v", err)
 	}
-	s.Objectives = cleanTokens(objList, objectiveToken)
+	if len(objList) != 1 {
+		return nil, errors.New("each snippet must be assigned to 1 objective")
+	}
+
+	s.Objective = strings.TrimSpace(
+		strings.ReplaceAll(objList[0], objectiveToken, ""))
 
 	// text, replace all objectives
 	txt := s.Raw
@@ -109,16 +114,6 @@ func parseItems(s, exp string) (items []string, err error) {
 	}
 
 	return list, nil
-}
-
-func cleanTokens(parts []string, token string) []string {
-
-	list := make([]string, len(parts))
-	for i, p := range parts {
-		list[i] = strings.ReplaceAll(p, token, "")
-	}
-
-	return list
 }
 
 func getID(t time.Time) string {

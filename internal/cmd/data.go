@@ -44,8 +44,8 @@ func initDB() {
 			stm DATETIME NOT NULL,
 			raw TEXT NOT NULL,
 			txt TEXT NOT NULL,
-			ctx TEXT NOT NULL,
-			obj TEXT NOT NULL
+			obj TEXT NOT NULL,
+			ctx TEXT NOT NULL
 		)`); err != nil {
 		log.Fatalf("error creating snippet table: %v", err)
 	}
@@ -68,28 +68,20 @@ func saveSnippet(item *snip.Snippet) error {
 	db := getDB()
 	defer db.Close()
 
+	// transaction for when more then one table
 	tx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("error creating transaction: %v", err)
 	}
 
 	_, err = tx.Exec(`INSERT INTO snippet
-		(sid, stm, raw, txt, ctx, obj) VALUES (?,?,?,?,?,?)`,
+		(sid, stm, raw, txt, obj, ctx) VALUES (?,?,?,?,?,?)`,
 		item.ID, item.CreationTime, item.Raw, item.Text,
-		strings.Join(item.Contexts, ","),
-		strings.Join(item.Objectives, ","))
+		item.Objective,
+		strings.Join(item.Contexts, ","))
 	if err != nil {
 		tx.Rollback()
 		return fmt.Errorf("error inserting %+v to db: %v", item, err)
-	}
-
-	for _, obj := range item.Objectives {
-		_, err = tx.Exec("INSERT INTO metric (sid, key, val) VALUES (?,?,?)",
-			item.ID, objectiveKey, obj)
-		if err != nil {
-			tx.Rollback()
-			return fmt.Errorf("error inserting objective %s to db: %v", obj, err)
-		}
 	}
 
 	err = tx.Commit()
@@ -100,35 +92,42 @@ func saveSnippet(item *snip.Snippet) error {
 	return nil
 }
 
-func getWeekSnippets(weekStart time.Time) (items []*snip.Snippet, err error) {
-
-	weekEnd := weekStart.AddDate(0, 0, 7)
+func getPeriodSnippets(periodStart time.Time) (period *snip.Period, err error) {
 
 	db := getDB()
 	defer db.Close()
 
 	rows, err := db.Query(`SELECT
-		sid, stm, raw, txt, ctx, obj
+		sid, stm, raw, txt, obj, ctx
 		FROM snippet
-		WHERE stm >= ? AND stm <= ?
-		ORDER BY stm
-	`, weekStart, weekEnd)
+		WHERE stm >= ?
+		ORDER BY obj, stm desc
+	`, periodStart)
 
 	if err != nil {
 		return nil, fmt.Errorf("error selecting snippets: %v", err)
 	}
 
-	snips := []*snip.Snippet{}
-	for rows.Next() {
-		snip := &snip.Snippet{}
-		var ctxs, objs string
-		rows.Scan(&snip.ID, &snip.CreationTime, &snip.Raw, &snip.Text, &ctxs, &objs)
-		snip.Objectives = strings.Split(objs, ",")
-		snip.Contexts = strings.Split(ctxs, ",")
-		snips = append(snips, snip)
+	p := &snip.Period{
+		PeriodStart:       periodStart,
+		ObjectiveSnippets: make(map[string][]*snip.Snippet),
 	}
 
-	return snips, nil
+	for rows.Next() {
+		s := &snip.Snippet{}
+		var ctxs string
+		rows.Scan(&s.ID, &s.CreationTime, &s.Raw,
+			&s.Text, &s.Objective, &ctxs)
+		s.Contexts = strings.Split(ctxs, ",")
+
+		if _, has := p.ObjectiveSnippets[s.Objective]; !has {
+			p.ObjectiveSnippets[s.Objective] = []*snip.Snippet{}
+		}
+
+		p.ObjectiveSnippets[s.Objective] = append(p.ObjectiveSnippets[s.Objective], s)
+	}
+
+	return p, nil
 }
 
 func makeTable(db *sql.DB, sql string) error {

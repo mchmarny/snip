@@ -3,8 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"log"
-	"strings"
+	"os"
 	"time"
 
 	"github.com/mchmarny/snip/pkg/snip"
@@ -42,22 +41,33 @@ func reportPeriod(c *cli.Context) error {
 	weekOffset := c.Int("week-offset")
 	weekStart := getWeekPeriodStart(weekOffset)
 
-	list, err := getWeekSnippets(weekStart)
+	wr := os.Stdout
+	outputPath := c.String("output")
+	if outputPath != "" {
+		file, err := os.Create(outputPath)
+		if err != nil {
+			return fmt.Errorf("error creating output file (%s): %v",
+				outputPath, err)
+		}
+		defer file.Close()
+		wr = file
+	}
+
+	pr, err := getPeriodSnippets(weekStart)
 	if err != nil {
 		return fmt.Errorf("error quering data: %v", err)
 	}
 
-	log.Printf("snippets for week startign with: %s ",
-		weekStart.Format(snip.SnippetDateTimeFormat))
+	fmt.Fprintf(wr, "#Week of: %s\n",
+		pr.PeriodStart.Format(snip.SnippetDateTimeFormat))
 
-	for i, s := range list {
-		log.Printf("[%d] id:%s text:%s on:%s objectives:%s contexts:%s",
-			i,
-			s.ID,
-			s.Text,
-			s.CreationTime.Format(snip.SnippetDateTimeFormat),
-			strings.Join(s.Objectives, ","),
-			strings.Join(s.Contexts, ","))
+	for c, s := range pr.ObjectiveSnippets {
+		fmt.Fprintf(wr, "##%s\n", c)
+		for _, si := range s {
+			fmt.Fprintf(wr, "* %s - %s\n",
+				si.CreationTime.Format(snip.SnippetDateFormat),
+				si.Text)
+		}
 	}
 
 	return nil
