@@ -35,6 +35,7 @@ build: mod
 	git push origin "release-${RELEASE_VERSION}"
 	git log --oneline
 
-	script/uppload-release-asset.sh \
-		tag=release-${RELEASE_VERSION} \
-		filename=bin/snip-mac-${RELEASE_VERSION}
+release:
+	script/release.sh \
+		tag="release-${RELEASE_VERSION}" \
+		filename="bin/snip-mac-${RELEASE_VERSION}"
