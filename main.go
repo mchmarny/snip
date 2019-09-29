@@ -4,9 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/mchmarny/snip/internal/command/config"
-	"github.com/mchmarny/snip/internal/command/manage"
-	"github.com/mchmarny/snip/internal/command/report"
+	"github.com/mchmarny/snip/internal/cmd"
 
 	"github.com/urfave/cli"
 )
@@ -18,15 +16,18 @@ const (
 
 func main() {
 
+	log.SetOutput(os.Stdout)
+	log.SetFlags(0)
+
 	app := cli.NewApp()
 	app.Name = appName
 	app.Version = appVersion
 	app.Usage = "Snippet management utility"
 	app.Commands = []cli.Command{
-		config.InitConfigCommand,
-		manage.AddSnipCommand,
-		report.ReportCommand,
-		report.RankCommand,
+		cmd.InitConfigCommand,
+		cmd.AddSnipCommand,
+		cmd.ReportCommand,
+		cmd.RankCommand,
 	}
 
 	if err := app.Run(os.Args); err != nil {
