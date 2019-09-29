@@ -35,12 +35,16 @@ func initConfig(c *cli.Context) error {
 		return err
 	}
 
+	usrDirPath := getUserDirPath()
+
 	if !ok {
-		err = os.Mkdir(getUserDirPath(), 0700)
+		err = os.Mkdir(usrDirPath, 0700)
 		if err != nil {
 			return err
 		}
 	}
+
+	initDB() // fatal errors s
 
 	return nil
 }

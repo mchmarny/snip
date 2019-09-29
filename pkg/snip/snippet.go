@@ -15,6 +15,8 @@ const (
 
 // Snippet represents a single snippet
 type Snippet struct {
+	// ID is a hash of the creation time
+	ID string
 	// Raw is the original string that was entered by the user
 	Raw string
 	// Text is the parsed snippet, raw sans objective
@@ -28,7 +30,8 @@ type Snippet struct {
 }
 
 func (s Snippet) String() string {
-	return fmt.Sprintf("%s (text:%s \non:%s \nobjectives[%d]:%s \ncontexts[%d]:%s)",
+	return fmt.Sprintf("%s (id:%s \ntext:%s \non:%s \nobjectives[%d]:%s \ncontexts[%d]:%s)",
+		s.ID,
 		s.Raw,
 		s.Text,
 		s.CreationTime.Format(SnippetDateTimeFormat),

@@ -2,10 +2,10 @@
 
 # DEV
 
-test:
+test: mod
 	go test ./... -v
 
-install:
+install: mod
 	go install
 
 # BUILD

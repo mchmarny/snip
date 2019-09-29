@@ -11,7 +11,7 @@ import (
 
 const (
 	appName    = "snip"
-	appVersion = "v0.1.1"
+	appVersion = "v0.2.1"
 )
 
 func main() {
