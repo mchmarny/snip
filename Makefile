@@ -31,6 +31,7 @@ build: mod
 		'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
     	-mod vendor -o bin/snip-windows
 
+
 tag:
 	git tag "release-${RELEASE_VERSION}"
 	git push origin "release-${RELEASE_VERSION}"
