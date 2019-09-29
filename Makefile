@@ -1,4 +1,4 @@
-RELEASE_VERSION=v0.3.6
+RELEASE_VERSION=v0.3.7
 
 .PHONY: run mod build
 
@@ -31,11 +31,15 @@ build: mod
 		'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
     	-mod vendor -o bin/snip-windows-${RELEASE_VERSION}
 
+tag:
 	git tag "release-${RELEASE_VERSION}"
 	git push origin "release-${RELEASE_VERSION}"
-	git log --oneline
 
-release:
-	script/release.sh \
-		tag="release-${RELEASE_VERSION}" \
+assets:
+	script/release-asset.sh \
+		github_api_token="${GITHUB_ACCESS_TOKEN}" \
+		owner="mchmarny" \
+		repo="snip" \
+		tag="${RELEASE_VERSION}" \
 		filename="bin/snip-mac-${RELEASE_VERSION}"
+
