@@ -18,7 +18,7 @@ var (
 		Name:     "list",
 		Category: "Report",
 		Flags: []cli.Flag{
-			cli.StringFlag{Name: "period, p"},
+			cli.IntFlag{Name: "week-offset, w"},
 			cli.StringFlag{Name: "output, o"},
 		},
 		Usage:  "lists snippets for specified period",
@@ -39,7 +39,8 @@ var (
 
 func reportPeriod(c *cli.Context) error {
 
-	weekStart := getWeekPeriodStart(1)
+	weekOffset := c.Int("week-offset")
+	weekStart := getWeekPeriodStart(weekOffset)
 
 	list, err := getWeekSnippets(weekStart)
 	if err != nil {
