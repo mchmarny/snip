@@ -34,7 +34,7 @@ Whichever way you enter your snippets, `snip` will automatically parse the plain
 * `@bigco` and `@bigco` as the contexts of the above snippet
 * `^scale` as the objective to which this activity is aiming to achieve
 
-`snip` stores your snippets in your home directory (e.g. on Mac: `~/.snip/snip.md`) as a `sqlite` database.
+> Snippets are stored in your home directory (e.g. on Mac: `~/.snip/snip.md`).
 
 ### Reporting
 
