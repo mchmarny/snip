@@ -1,4 +1,4 @@
-RELEASE_VERSION=v0.4.1
+RELEASE_VERSION=v0.4.2
 
 .PHONY: run mod build
 
@@ -16,20 +16,17 @@ mod:
 	go mod vendor
 
 build: mod
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 \
-    	go build -a -tags netgo -ldflags \
-		'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
-    	-mod vendor -o bin/snip-mac-${RELEASE_VERSION}
+	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -tags netgo -ldflags \
+	'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
+	-mod vendor -o bin/snip-mac-${RELEASE_VERSION}
 
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
-    	go build -a -tags netgo -ldflags \
-		'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
-    	-mod vendor -o bin/snip-linux-${RELEASE_VERSION}
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags \
+	'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
+	-mod vendor -o bin/snip-linux-${RELEASE_VERSION}
 
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 \
-    	go build -a -tags netgo -ldflags \
-		'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
-    	-mod vendor -o bin/snip-windows-${RELEASE_VERSION}
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -tags netgo -ldflags \
+	'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
+	-mod vendor -o bin/snip-windows-${RELEASE_VERSION}
 
 tag:
 	git tag "release-${RELEASE_VERSION}"
