@@ -1,6 +1,6 @@
 # snip
 
-In most work environments you set some kind of objectives and define a set of key results to achieve that objective. Usually you also provided some kind of periodical report (snippets) of your activities to achieve that objective. This utility is meant to simplify the recording and reporting by helping you capture and report your "snippets".
+In most companies people set objectives and define some kind of results that will indicate progress towards achieve that objective ([OKRs](https://en.wikipedia.org/wiki/OKR)). Most of the time, people working on these key results will provided periodic reports (snippets), on their activities towards each objective. This utility is meant to simplify the recording and reporting of these "snippets".
 
 > snip follows the [Howardism principle](http://www.howardism.org/Taoism/Do_Without_Doing.html), "Do Without Doing". Switching context is expensive, so `snip` allows you to record your activity as fast as posable and get back to what you were doing
 
