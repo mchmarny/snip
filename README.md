@@ -69,7 +69,7 @@ The result will look something like this:
 
 ## Install
 
-To install the utility either download the [latest release](https://github.com/mchmarny/snip/releases/latest) and put it or, if you do not have `golang` installed, clone the repo and install it using `go`"
+To install the utility either download the [latest release](https://github.com/mchmarny/snip/releases/latest) and put it somewhere in your local PATH or, if you have `golang` installed, clone the repo and install it using `go`"
 
 ```shell
 clone git@github.com:mchmarny/snip.git
@@ -77,13 +77,9 @@ cd snip
 make install
 ```
 
-
-
-
 ## Disclaimer
 
 This is my personal project and it does not represent my employer. I take no responsibility for issues caused by this code. I do my best to ensure that everything works, but if something goes wrong, my apologies is all you will get.
-
 
 ## License
 This software is released under the [Apache v2 License](./LICENSE)
