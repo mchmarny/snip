@@ -2,11 +2,11 @@
 
 In most companies people set objectives and define some kind of results that will indicate progress towards achieve that objective ([OKRs](https://en.wikipedia.org/wiki/OKR)). Most of the time, people working on these key results will provided periodic reports (snippets), on their activities towards each objective. This utility is meant to simplify the recording and reporting of these "snippets".
 
-> snip follows the [Howardism principle](http://www.howardism.org/Taoism/Do_Without_Doing.html), "Do Without Doing". Switching context is expensive, so `snip` allows you to record your activity as fast as posable and get back to what you were doing
+> Switching context is expensive. snip follows the [Howardism principle](http://www.howardism.org/Taoism/Do_Without_Doing.html), "Do Without Doing" to help you record your snippets as fast as posable and get back to what you were doing
 
 ## Usage
 
-`snip` can be used from either commandline, or any other workflow utility that is able to integrate with commandline, like [Alfred](https://www.alfredapp.com/).
+The `snip` CLI can be used from either commandline, or any other workflow utility that is able to integrate your commandline, like [Alfred](https://www.alfredapp.com/).
 
 ### Recording Snippets
 
