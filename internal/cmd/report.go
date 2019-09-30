@@ -80,7 +80,8 @@ func rankPeriod(c *cli.Context) error {
 func getWeekPeriodStart(offset int) time.Time {
 	now := time.Now()
 	today := now.Weekday()
-	lastSunday := now.AddDate(0, 0, -int(today))
-	periodStart := lastSunday.AddDate(0, 0, -(offset * 7))
-	return periodStart
+	lastSun := now.AddDate(0, 0, -int(today))
+	offsetSun := lastSun.AddDate(0, 0, -(offset * 7))
+	wkStart := time.Date(offsetSun.Year(), offsetSun.Month(), offsetSun.Day(), 0, 0, 0, 0, time.UTC)
+	return wkStart
 }

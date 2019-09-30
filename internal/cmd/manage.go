@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"log"
@@ -46,15 +44,12 @@ func addSnip(c *cli.Context) error {
 		return fmt.Errorf("error parsing snippet: %v", e)
 	}
 
-	// id from creation time
-	s.ID = getID(s.CreationTime)
-
 	// save
 	if e = saveSnippet(s); e != nil {
 		return fmt.Errorf("error saving item %+s: %v", s, e)
 	}
 
-	log.Printf("snippet saved: %s", s.ID)
+	log.Println("snippet saved")
 
 	return nil
 }
@@ -114,10 +109,4 @@ func parseItems(s, exp string) (items []string, err error) {
 	}
 
 	return list, nil
-}
-
-func getID(t time.Time) string {
-	h := md5.New()
-	h.Write([]byte(t.String()))
-	return hex.EncodeToString(h.Sum(nil))
 }

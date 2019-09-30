@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -40,9 +39,4 @@ func TestParseFullSnippet(t *testing.T) {
 	assert.NotNil(t, item)
 	assert.Equal(t, raw, item.Raw)
 	assert.Equal(t, txt, item.Text)
-}
-
-func TestIDGetter(t *testing.T) {
-	id := getID(time.Now())
-	assert.NotNil(t, id)
 }

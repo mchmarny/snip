@@ -1,15 +1,13 @@
 package cmd
 
 import (
-	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"path"
-	"strings"
 	"time"
 
-	// sqlite provides DB driver implementation
-	_ "github.com/mattn/go-sqlite3"
+	bolt "go.etcd.io/bbolt"
 
 	"github.com/mchmarny/snip/pkg/snip"
 )
@@ -19,11 +17,14 @@ const (
 	objectiveKey = "objective"
 )
 
-func getDB() *sql.DB {
+func getDB() *bolt.DB {
 	dbPath := path.Join(getUserDirPath(), dbFileName)
-	db, err := sql.Open("sqlite3", dbPath)
+
+	db, err := bolt.Open(dbPath, 0600, &bolt.Options{
+		Timeout: 3 * time.Second,
+	})
 	if err != nil {
-		log.Fatalf("error connecting to db %s: %v", dbPath, err)
+		log.Fatalf("error creating db: %v", err)
 	}
 	return db
 }
@@ -33,115 +34,74 @@ func initDB() {
 	db := getDB()
 	defer db.Close()
 
-	if err := db.Ping(); err != nil {
-		log.Fatalf("error pinging db: %v", err)
+	tx, err := db.Begin(true)
+	if err != nil {
+		log.Fatalf("error transaction: %v", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.CreateBucketIfNotExists([]byte("snippet"))
+	if err != nil {
+		log.Fatalf("error creating snippet bucket: %v", err)
 	}
 
-	// snippet
-	if err := makeTable(db, `CREATE TABLE IF NOT EXISTS
-		snippet (
-			sid TEXT PRIMARY KEY,
-			stm DATETIME NOT NULL,
-			raw TEXT NOT NULL,
-			txt TEXT NOT NULL,
-			obj TEXT NOT NULL,
-			ctx TEXT NOT NULL
-		)`); err != nil {
-		log.Fatalf("error creating snippet table: %v", err)
+	_, err = tx.CreateBucketIfNotExists([]byte("objective"))
+	if err != nil {
+		log.Fatalf("error creating objective bucket: %v", err)
 	}
 
-	// metric
-	if err := makeTable(db, `CREATE TABLE IF NOT EXISTS
-		metric (
-			sid TEXT NOT NULL,
-			key TEXT NOT NULL,
-			val TEXT NOT NULL,
-			PRIMARY KEY (sid, key)
-		)`); err != nil {
-		log.Fatalf("error creating metric table: %v", err)
+	if err = tx.Commit(); err != nil {
+		log.Fatalf("error commiting changes to db: %v", err)
 	}
 
 }
 
 func saveSnippet(item *snip.Snippet) error {
-
-	db := getDB()
-	defer db.Close()
-
-	// transaction for when more then one table
-	tx, err := db.Begin()
-	if err != nil {
-		return fmt.Errorf("error creating transaction: %v", err)
-	}
-
-	_, err = tx.Exec(`INSERT INTO snippet
-		(sid, stm, raw, txt, obj, ctx) VALUES (?,?,?,?,?,?)`,
-		item.ID, item.CreationTime, item.Raw, item.Text,
-		item.Objective,
-		strings.Join(item.Contexts, ","))
-	if err != nil {
-		tx.Rollback()
-		return fmt.Errorf("error inserting %+v to db: %v", item, err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		return fmt.Errorf("error commiting save to db: %v", err)
-	}
-
-	return nil
+	return getDB().Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte("snippet"))
+		buf, err := json.Marshal(item)
+		if err != nil {
+			return err
+		}
+		return b.Put(toByte(item.CreationTime), buf)
+	})
 }
 
 func getPeriodSnippets(periodStart time.Time) (period *snip.Period, err error) {
-
-	db := getDB()
-	defer db.Close()
-
-	rows, err := db.Query(`SELECT
-		sid, stm, raw, txt, obj, ctx
-		FROM snippet
-		WHERE stm >= ?
-		ORDER BY obj, stm desc
-	`, periodStart)
-
-	if err != nil {
-		return nil, fmt.Errorf("error selecting snippets: %v", err)
-	}
 
 	p := &snip.Period{
 		PeriodStart:       periodStart,
 		ObjectiveSnippets: make(map[string][]*snip.Snippet),
 	}
 
-	for rows.Next() {
-		s := &snip.Snippet{}
-		var ctxs string
-		rows.Scan(&s.ID, &s.CreationTime, &s.Raw,
-			&s.Text, &s.Objective, &ctxs)
-		s.Contexts = strings.Split(ctxs, ",")
+	e := getDB().View(func(tx *bolt.Tx) error {
 
-		if _, has := p.ObjectiveSnippets[s.Objective]; !has {
-			p.ObjectiveSnippets[s.Objective] = []*snip.Snippet{}
+		c := tx.Bucket([]byte("snippet")).Cursor()
+
+		min := toByte(periodStart)
+		for k, v := c.Seek(min); k != nil; k, v = c.Next() {
+			var s snip.Snippet
+			if err := json.Unmarshal(v, &s); err != nil {
+				return fmt.Errorf("error while decoding snippet")
+			}
+			if _, has := p.ObjectiveSnippets[s.Objective]; !has {
+				p.ObjectiveSnippets[s.Objective] = []*snip.Snippet{}
+			}
+			p.ObjectiveSnippets[s.Objective] = append(p.ObjectiveSnippets[s.Objective], &s)
 		}
+		return nil
+	})
 
-		p.ObjectiveSnippets[s.Objective] = append(p.ObjectiveSnippets[s.Objective], s)
-	}
+	return p, e
 
-	return p, nil
 }
 
-func makeTable(db *sql.DB, sql string) error {
+func toByte(v time.Time) []byte {
 
-	stmt, err := db.Prepare(sql)
-	if err != nil {
-		return fmt.Errorf("error prepering table statement: %v", err)
-	}
+	// b := make([]byte, 8)
+	// binary.BigEndian.PutUint64(b, uint64(v.Unix()))
+	// return b
 
-	_, err = stmt.Exec()
-	if err != nil {
-		return fmt.Errorf("error creating table: %v", err)
-	}
-
-	return nil
+	return []byte(fmt.Sprintf("%d", v.Unix()))
 
 }
