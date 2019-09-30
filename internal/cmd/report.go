@@ -17,10 +17,10 @@ var (
 		Name:     "list",
 		Category: "Report",
 		Flags: []cli.Flag{
-			cli.IntFlag{Name: "week-offset, w"},
+			cli.IntFlag{Name: "week-offset, w", Value: 1},
 			cli.StringFlag{Name: "output, o"},
 		},
-		Usage:  "lists snippets for specified period",
+		Usage:  "lists snippets for specified period (default: 1)",
 		Action: reportPeriod,
 	}
 

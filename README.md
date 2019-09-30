@@ -12,42 +12,44 @@ The `snip` CLI can be used from either commandline, or any other workflow utilit
 
 #### Commandline
 
-To record snippet from commandline:
+To record snippet from commandline you can just use plain text like this:
 
 ```shell
-snip add Met with @john from @bigco re project Apollo ^scale
+snip add Met with @john from @bigco regarding project Apollo ^scale
 ```
 
 #### Alfred
 
-Alfred automatically wires the snip activity, all you have to do is:
+Productivity tools like Alfred will automatically wire the `snip` activity so all you'll have to do is:
 
 ![](image/alfred.png)
 
-> You can import this Alfred workflow from the [snip.alfredworkflow](./workflow/snip.alfredworkflow) directory
+> Check my [Alfred snip workflow](./workflow/snip.alfredworkflow)
 
 ### Snippet Data
 
-Whichever way you enter the snippet, the above commandline will automatically be recognized and recorded as:
+Whichever way you enter your snippets, `snip` will automatically parse the plain text into few key attributes. For example, the above commandline will be recognized as:
 
-* `Met with @john from @bigco re project Apollo` as the snippet
+* `Met with @john from @bigco regarding project Apollo` as the snippet
 * `@bigco` and `@bigco` as the contexts of the above snippet
 * `^scale` as the objective to which this activity is aiming to achieve
 
+`snip` stores your snippets in your home directory (e.g. on Mac: `~/.snip/snip.md`) as a `sqlite` database.
+
 ### Reporting
 
-`snip` stores your snippets in your home directory as a `sqlite` database. To report at any given time on the captured snippets:
+To generate report from the captured snippets simply provide the number of weeks you want to go back:
 
 ```shell
 snip list -w 1
 ```
 
-This will print to console your snippets for the current week (`--week-ofset` or it's shorter version `-w`) indicate the number of weeks in the past (starting with Sunday).
+This will print your snippets to console for the current week (`--week-ofset` or its shorter version `-w`) indicate the number of weeks in the past (starting with Sunday).
 
 If you want to output to markdown simplify append the file path (`--output` or `-o`)
 
 ```shell
-snip list -w 1 -o ~/Downloads/snippets.md
+snip list -w 1 -o ./snippets.md
 ```
 
 The result will look something like this:
