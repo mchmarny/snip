@@ -10,6 +10,12 @@ test: mod
 install: mod
 	go install
 
+list:
+	go list -m all
+
+update:
+	go get -u ./...
+
 # BUILD
 mod:
 	go mod tidy
