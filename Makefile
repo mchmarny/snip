@@ -1,4 +1,4 @@
-RELEASE_VERSION=v0.4.3
+RELEASE_VERSION=v0.4.4
 
 .PHONY: run mod build
 
