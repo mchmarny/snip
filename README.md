@@ -24,7 +24,7 @@ Productivity tools like Alfred will automatically wire the `snip` activity so al
 
 ![](image/alfred.png)
 
-> Check my [Alfred snip workflow](./integration/alfred/snip.alfredworkflow)
+> Check my [Alfred snip workflow](https://github.com/mchmarny/snip/releases/download/v0.5.1/snip.alfredworkflow)
 
 ### Snippet Data
 
@@ -80,8 +80,11 @@ brew install mchmarny/snip/snip
 
 All new release will be automatically picked up with `brew upgrade`.
 
-`snip` also provides pre-build releases for Mac, Linux, and Windows for both, AMD and ARM. See [releases](https://github.com/mchmarny/snip/releases) to download the supported distributable for your platform/architecture combination. Alternatively, you can build your own version, see [BUILD.md](./BUILD.md) for details.
+`snip` also provides pre-build releases for Mac, Linux, and Windows for both, AMD and ARM. See [releases](https://github.com/mchmarny/snip/releases) to download the supported distributable for your platform/architecture combination. 
 
+Once installed, you can aldo install the [Alfred](https://www.alfredapp.com/) action that wraps snip [here](https://github.com/mchmarny/snip/releases/download/v0.5.1/snip.alfredworkflow)
+
+Alternatively, you can build your own version, see [BUILD.md](./BUILD.md) for details.
 
 ## Disclaimer
 
