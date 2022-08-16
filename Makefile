@@ -1,43 +1,75 @@
-RELEASE_VERSION=v0.4.4
+RELEASE_VERSION ?=$(shell cat ./version)
+RELEASE_COMMIT  ?=$(shell git rev-parse --short HEAD)
+RELEASE_DATE    ?=$(shell date +%Y-%m-%dT%H:%M:%S%Z)
 
-.PHONY: run mod build
+all: help
 
-# DEV
+version: ## Prints the current version
+	@echo $(RELEASE_VERSION) - $(RELEASE_COMMIT) - $(RELEASE_DATE)
+.PHONY: version
 
-test: mod
-	go test ./... -v
-
-install: mod
-	go install
-
-list:
-	go list -m all
-
-update:
-	go get -u ./...
-
-# BUILD
-mod:
+tidy: ## Updates the go modules and vendors all dependancies 
 	go mod tidy
 	go mod vendor
+.PHONY: tidy
 
-build: mod
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -a -tags netgo -ldflags \
-	'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
-	-mod vendor -o bin/snip-mac-${RELEASE_VERSION}
+upgrade: ## Upgrades all dependancies 
+	go get -d -u ./...
+	go mod tidy
+	go mod vendor
+.PHONY: upgrade
 
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags \
-	'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
-	-mod vendor -o bin/snip-linux-${RELEASE_VERSION}
+test: tidy ## Runs unit tests
+	go test -count=1 -race -covermode=atomic -coverprofile=cover.out ./...
+.PHONY: test
 
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -a -tags netgo -ldflags \
-	'-w -extldflags "-static" -X main.AppVersion=${RELEASE_VERSION}' \
-	-mod vendor -o bin/snip-windows-${RELEASE_VERSION}
+run: tidy ## Runs uncompiled version of the app
+	go run cmd/snip/main.go
+.PHONY: run
 
-tag:
-	git tag "release-${RELEASE_VERSION}"
-	git push origin "release-${RELEASE_VERSION}"
+cover: test ## Runs unit tests and putputs coverage
+	go tool cover -func=cover.out
+.PHONY: cover
 
-assets:
-	script/release-asset.sh "${RELEASE_VERSION}"
+lint: ## Lints the entire project 
+	golangci-lint -c .golangci.yaml run
+.PHONY: lint
 
+cli: tidy ## Builds CLI binary
+	CGO_ENABLED=0 go build -ldflags=" \
+		-X 'main.version=$(RELEASE_VERSION)' \
+		-X 'main.commit=$(RELEASE_COMMIT)' \
+		-X 'main.date=$(RELEASE_DATE)' " \
+		-o bin/snip \
+		cmd/snip/main.go
+.PHONY: cli
+
+dist: test lint ## Runs test, lint before building distributables
+	goreleaser release --snapshot --rm-dist --timeout 10m0s
+.PHONY: dist
+
+local: ## Copies latest binary to local bin directory
+	sudo cp bin/snip /usr/local/bin/dctl
+	sudo chmod 755 /usr/local/bin/dctl
+.PHONY: local
+
+tag: ## Creates release tag 
+	git tag $(RELEASE_VERSION)
+	git push origin $(RELEASE_VERSION)
+.PHONY: tag
+
+tagless: ## Delete the current release tag 
+	git tag -d $(RELEASE_VERSION)
+	git push --delete origin $(RELEASE_VERSION)
+.PHONY: tagless
+
+clean: ## Cleans bin and temp directories
+	go clean
+	rm -fr ./vendor
+	rm -fr ./bin
+.PHONY: clean
+
+help: ## Display available commands
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk \
+		'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+.PHONY: help

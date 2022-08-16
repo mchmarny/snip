@@ -24,7 +24,7 @@ Productivity tools like Alfred will automatically wire the `snip` activity so al
 
 ![](image/alfred.png)
 
-> Check my [Alfred snip workflow](./workflow/snip.alfredworkflow)
+> Check my [Alfred snip workflow](./integration/alfred/snip.alfredworkflow)
 
 ### Snippet Data
 
@@ -34,7 +34,7 @@ Whichever way you enter your snippets, `snip` will automatically parse the plain
 * `@bigco` and `@bigco` as the contexts of the above snippet
 * `^scale` as the objective to which this activity is aiming to achieve
 
-> Snippets are stored in your home directory (e.g. on Mac: `~/.snip/snip.md`).
+> context and objective are optional
 
 ### Reporting
 
@@ -44,7 +44,7 @@ To generate report from the captured snippets simply provide the number of weeks
 snip list -w 1
 ```
 
-This will print your snippets to console for the current week (`--week-ofset` or its shorter version `-w`) indicate the number of weeks in the past (starting with Sunday).
+This will print your snippets to console for the current week (`--week-offset` or its shorter version `-w`) indicate the number of weeks in the past (starting with Sunday).
 
 If you want to output to markdown simplify append the file path (`--output` or `-o`)
 
@@ -67,19 +67,26 @@ The result will look something like this:
 * 2019-09-26 - wrote a document proposal for @July
 ```
 
+> Snippets are stored in your home directory (e.g. on Mac: `~/.snip/snip.db`).
+
 ## Install
 
-To install the utility either download the [latest release](https://github.com/mchmarny/snip/releases/latest) and put it somewhere in your local PATH or, if you have `golang` installed, clone the repo and install it using `go`"
+On Max and Linux you can install `snip` with [Homebrew](https://brew.sh/):
 
 ```shell
-clone git@github.com:mchmarny/snip.git
-cd snip
-make install
+brew tap mchmarny/snip
+brew install snip
 ```
+
+All new release will be automatically picked up with `brew upgrade`.
+
+`snip` also provides pre-build releases for Mac, Linux, and Windows for both, AMD and ARM. See [releases](https://github.com/mchmarny/snip/releases) to download the supported distributable for your platform/architecture combination. Alternatively, you can build your own version, see [BUILD.md](./BUILD.md) for details.
+
 
 ## Disclaimer
 
 This is my personal project and it does not represent my employer. I take no responsibility for issues caused by this code. I do my best to ensure that everything works, but if something goes wrong, my apologies is all you will get.
 
 ## License
+
 This software is released under the [Apache v2 License](./LICENSE)

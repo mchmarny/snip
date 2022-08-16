@@ -3,57 +3,93 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"os"
 	"path"
+	"path/filepath"
 	"time"
 
-	bolt "go.etcd.io/bbolt"
-
 	"github.com/mchmarny/snip/pkg/snip"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
+	bolt "go.etcd.io/bbolt"
 )
 
 const (
-	dbFileName   = "snip.db"
-	objectiveKey = "objective"
+	dbFileName = "snip.db"
+	dbFilePerm = 0600
+
+	homeDirName = ".snip"
+	homeDirPerm = 0700
+
+	dbTimeoutSec = 3
 )
 
-func getDB() *bolt.DB {
-	dbPath := path.Join(getUserDirPath(), dbFileName)
+var (
+	dbFilePath = path.Join(getHomeDir(), dbFileName)
+)
 
-	db, err := bolt.Open(dbPath, 0600, &bolt.Options{
-		Timeout: 3 * time.Second,
-	})
-	if err != nil {
-		log.Fatalf("error creating db: %v", err)
+func Init() error {
+	if _, err := os.Stat(dbFilePath); !errors.Is(err, os.ErrNotExist) {
+		return nil
 	}
-	return db
-}
-
-func initDB() {
 
 	db := getDB()
 	defer db.Close()
 
 	tx, err := db.Begin(true)
 	if err != nil {
-		log.Fatalf("error transaction: %v", err)
+		return errors.Wrap(err, "error creating transaction")
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err = tx.Rollback(); err != nil && err != bolt.ErrTxClosed {
+			log.Fatalf("error rolling back transaction: %v", err)
+		}
+	}()
 
 	_, err = tx.CreateBucketIfNotExists([]byte("snippet"))
 	if err != nil {
-		log.Fatalf("error creating snippet bucket: %v", err)
+		return errors.Wrap(err, "error creating snippet bucket")
 	}
 
 	_, err = tx.CreateBucketIfNotExists([]byte("objective"))
 	if err != nil {
-		log.Fatalf("error creating objective bucket: %v", err)
+		return errors.Wrap(err, "error creating objective bucket")
 	}
 
 	if err = tx.Commit(); err != nil {
-		log.Fatalf("error commiting changes to db: %v", err)
+		return errors.Wrap(err, "error committing changes to db")
 	}
+	return nil
+}
 
+func getHomeDir() string {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		log.Printf("error getting home dir, using current dir instead: %v", err)
+		return "."
+	}
+	log.Debugf("home dir: %s", home)
+
+	dirPath := filepath.Join(home, homeDirName)
+	if _, err := os.Stat(dirPath); errors.Is(err, os.ErrNotExist) {
+		log.Debugf("creating dir: %s", dirPath)
+		err := os.Mkdir(dirPath, homeDirPerm)
+		if err != nil {
+			log.Debugf("error creating dir: %s, using home: %s - %v", dirPath, home, err)
+			return home
+		}
+	}
+	return dirPath
+}
+
+func getDB() *bolt.DB {
+	db, err := bolt.Open(dbFilePath, dbFilePerm, &bolt.Options{
+		Timeout: dbTimeoutSec * time.Second,
+	})
+	if err != nil {
+		log.Fatalf("error creating db: %v", err)
+	}
+	return db
 }
 
 func saveSnippet(item *snip.Snippet) error {
@@ -68,14 +104,12 @@ func saveSnippet(item *snip.Snippet) error {
 }
 
 func getPeriodSnippets(periodStart time.Time) (period *snip.Period, err error) {
-
 	p := &snip.Period{
 		PeriodStart:       periodStart,
 		ObjectiveSnippets: make(map[string][]*snip.Snippet),
 	}
 
 	e := getDB().View(func(tx *bolt.Tx) error {
-
 		c := tx.Bucket([]byte("snippet")).Cursor()
 
 		min := toByte(periodStart)
@@ -93,15 +127,8 @@ func getPeriodSnippets(periodStart time.Time) (period *snip.Period, err error) {
 	})
 
 	return p, e
-
 }
 
 func toByte(v time.Time) []byte {
-
-	// b := make([]byte, 8)
-	// binary.BigEndian.PutUint64(b, uint64(v.Unix()))
-	// return b
-
 	return []byte(fmt.Sprintf("%d", v.Unix()))
-
 }

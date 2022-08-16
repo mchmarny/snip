@@ -10,22 +10,20 @@ import (
 
 	"github.com/mchmarny/snip/pkg/snip"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
-	objectiveToken  = "^"
-	objectiveRegExp = `(?:^|\s)\^(\w+)\b`
-	contextToken    = "@"
-	contextRegExp   = `(?:^|\s)\@(\w+)\b`
-	snippetIDPrefix = "id-"
+	objectiveToken   = "^"
+	objectiveRegExp  = `(?:^|\s)\^(\w+)\b`
+	contextRegExp    = `(?:^|\s)\@(\w+)\b`
+	objectiveDefault = "no-objective"
 )
 
 var (
 	// AddSnipCommand adds new snippet
-	AddSnipCommand = cli.Command{
+	AddSnipCommand = &cli.Command{
 		SkipFlagParsing: true,
-		SkipArgReorder:  true,
 		Name:            "add",
 		Category:        "Manage",
 		Usage:           "add new snippet",
@@ -34,8 +32,7 @@ var (
 )
 
 func addSnip(c *cli.Context) error {
-
-	raw := strings.Join([]string(c.Args()), " ")
+	raw := strings.Join(c.Args().Slice(), " ")
 	log.Printf("raw: %s", raw)
 
 	// parse
@@ -50,7 +47,6 @@ func addSnip(c *cli.Context) error {
 	}
 
 	log.Println("snippet saved")
-
 	return nil
 }
 
@@ -77,11 +73,10 @@ func parseSnippet(text string) (snippet *snip.Snippet, err error) {
 		return nil, fmt.Errorf("error parsing objectives: %v", err)
 	}
 	if len(objList) != 1 {
-		return nil, errors.New("each snippet must be assigned to 1 objective")
+		objList = []string{objectiveDefault}
 	}
 
-	s.Objective = strings.TrimSpace(
-		strings.ReplaceAll(objList[0], objectiveToken, ""))
+	s.Objective = strings.TrimSpace(strings.ReplaceAll(objList[0], objectiveToken, ""))
 
 	// text, replace all objectives
 	txt := s.Raw

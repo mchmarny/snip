@@ -30,7 +30,6 @@ func TestParseCleanContext(t *testing.T) {
 }
 
 func TestParseFullSnippet(t *testing.T) {
-
 	txt := "did this and that with @person1 in @place1"
 	raw := txt + " ^obj1"
 

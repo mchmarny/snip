@@ -1,43 +1,45 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/mchmarny/snip/pkg/snip"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
+)
+
+const (
+	weekDays = 7
 )
 
 var (
+	offsetFlag = &cli.IntFlag{
+		Name:    "week-offset",
+		Value:   1,
+		Aliases: []string{"w"},
+	}
+
+	outputFlag = &cli.StringFlag{
+		Name:    "output",
+		Aliases: []string{"o"},
+	}
+
 	// ReportCommand lists all snippets for specific period
-	ReportCommand = cli.Command{
+	ReportCommand = &cli.Command{
 		Name:     "list",
 		Category: "Report",
 		Flags: []cli.Flag{
-			cli.IntFlag{Name: "week-offset, w", Value: 1},
-			cli.StringFlag{Name: "output, o"},
+			offsetFlag,
+			outputFlag,
 		},
 		Usage:  "lists snippets for specified period (default: 1)",
 		Action: reportPeriod,
 	}
-
-	// RankCommand ranks snippets based on number of tags for specific period
-	RankCommand = cli.Command{
-		Name:     "rank",
-		Category: "Report",
-		Flags: []cli.Flag{
-			cli.StringFlag{Name: "period, p"},
-		},
-		Usage:  "lists snippets based on tags for specified period",
-		Action: rankPeriod,
-	}
 )
 
 func reportPeriod(c *cli.Context) error {
-
 	weekOffset := c.Int("week-offset")
 	weekStart := getWeekPeriodStart(weekOffset)
 
@@ -73,15 +75,11 @@ func reportPeriod(c *cli.Context) error {
 	return nil
 }
 
-func rankPeriod(c *cli.Context) error {
-	return errors.New("not implemented yet")
-}
-
 func getWeekPeriodStart(offset int) time.Time {
 	now := time.Now()
 	today := now.Weekday()
 	lastSun := now.AddDate(0, 0, -int(today))
-	offsetSun := lastSun.AddDate(0, 0, -(offset * 7))
+	offsetSun := lastSun.AddDate(0, 0, -(offset * weekDays))
 	wkStart := time.Date(offsetSun.Year(), offsetSun.Month(), offsetSun.Day(), 0, 0, 0, 0, time.UTC)
 	return wkStart
 }
