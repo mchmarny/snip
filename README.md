@@ -75,7 +75,7 @@ On Max and Linux you can install `snip` with [Homebrew](https://brew.sh/):
 
 ```shell
 brew tap mchmarny/snip
-brew install mchmarny/snip
+brew install mchmarny/snip/snip
 ```
 
 All new release will be automatically picked up with `brew upgrade`.
