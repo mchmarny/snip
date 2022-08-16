@@ -49,8 +49,8 @@ dist: test lint ## Runs test, lint before building distributables
 .PHONY: dist
 
 local: ## Copies latest binary to local bin directory
-	sudo cp bin/snip /usr/local/bin/dctl
-	sudo chmod 755 /usr/local/bin/dctl
+	sudo cp bin/snip /usr/local/bin/snip
+	sudo chmod 755 /usr/local/bin/snip
 .PHONY: local
 
 tag: ## Creates release tag 

@@ -1,4 +1,4 @@
-project_name: dctl
+project_name: snip
 
 before:
   hooks:
