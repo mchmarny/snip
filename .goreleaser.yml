@@ -56,7 +56,7 @@ brews:
     tap:
       owner: mchmarny
       name: homebrew-snip
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+      token: "{{ .Env.HOMEBREW_SNIP_GITHUB_TOKEN }}"
     url_template: "https://github.com/mchmarny/snip/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
     commit_author:
       name: github-actions

@@ -38,7 +38,7 @@ func main() {
 		Name:     "snip",
 		Version:  fmt.Sprintf("%s (%s - %s)", version, commit, date),
 		Compiled: time.Now(),
-		Usage:    "Simple snippets utility",
+		Usage:    "Simple utility to collect snippets.",
 		Flags: []cli.Flag{
 			debugFlag,
 		},
